@@ -10,7 +10,6 @@ import cors from "cors";
 import slideRouter from "./route/slideRoutes";
 import loginRoute from "./route/loginRoutes";
 const app = express();
-
 app.use(cors());
 
 app.use(express.json());
