@@ -85,3 +85,24 @@ export const getAuthorNames = async (posts: postParamType) => {
     resolve(updatedPosts);
   });
 };
+
+export const tagBuilder = async (
+  title: string,
+  author: string,
+  resume: string
+) => {
+  const res = await extractor(title + " " + author + " " + resume);
+  return res;
+};
+
+export const extractor = async (value: string) => {
+  return new Promise((resolve, reject) => {
+    const lower = value.toLocaleLowerCase();
+    const signRemoved = lower.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const nonSig = signRemoved.replace(/[,.!?]/g, "");
+    const unique = Array.from(new Set(nonSig.split(" "))).filter(
+      (item) => item.length >= 4
+    );
+    resolve(unique);
+  });
+};

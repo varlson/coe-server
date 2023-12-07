@@ -6,11 +6,13 @@ export interface IPost extends Document {
   title: string;
   img: string;
   body: string;
+  resumo: string;
   createdAt?: Date;
   updatedAt?: Date;
   postType: number;
   author: IUser["_id"];
   edit_by?: IUser["_id"];
+  tags: string[];
 }
 
 export enum PremissionRoles {

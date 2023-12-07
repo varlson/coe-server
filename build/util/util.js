@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAuthorNames = exports.documentToIpost = exports.accessTokenGenerator = exports.credentialsVerifier = void 0;
+exports.extractor = exports.tagBuilder = exports.getAuthorNames = exports.documentToIpost = exports.accessTokenGenerator = exports.credentialsVerifier = void 0;
 // import { IPost } from "./../types/types";
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const types_1 = require("../types/types");
@@ -68,3 +68,18 @@ const getAuthorNames = (posts) => __awaiter(void 0, void 0, void 0, function* ()
     });
 });
 exports.getAuthorNames = getAuthorNames;
+const tagBuilder = (title, author, resume) => __awaiter(void 0, void 0, void 0, function* () {
+    const res = yield (0, exports.extractor)(title + " " + author + " " + resume);
+    return res;
+});
+exports.tagBuilder = tagBuilder;
+const extractor = (value) => __awaiter(void 0, void 0, void 0, function* () {
+    return new Promise((resolve, reject) => {
+        const lower = value.toLocaleLowerCase();
+        const signRemoved = lower.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const nonSig = signRemoved.replace(/[,.!?]/g, "");
+        const unique = Array.from(new Set(nonSig.split(" "))).filter((item) => item.length >= 4);
+        resolve(unique);
+    });
+});
+exports.extractor = extractor;

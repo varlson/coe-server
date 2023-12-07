@@ -18,23 +18,18 @@ const multer_1 = __importDefault(require("multer"));
 const fileManager_1 = require("../middleware/fileManager");
 const post_1 = __importDefault(require("../models/post"));
 const types_1 = require("../types/types");
+const util_1 = require("../util/util");
 const multer_2 = require("../config/multer");
 const upload = (0, multer_1.default)({ storage: multer_2.storage });
 const postRoutes = (0, express_1.Router)();
 //CREATE POST
 postRoutes.post("/create", upload.single("file"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { title, body, author, postType, noticeNumber } = req.body;
+    const { title, body, author, postType, noticeNumber, resumo } = req.body;
     const file = req.file;
-    const postContent = { title, body, author, postType };
+    const postContent = { title, body, author, postType, resumo };
     if (postType == types_1.PostTypes.NOTICE) {
         postContent.noticeNumber = noticeNumber;
     }
-    console.log("postContent");
-    console.log(postContent);
-    // return res.status(200).json({
-    //   msg: "",
-    //   postContent,
-    // });
     if (file) {
         const resp = yield (0, fileManager_1.uploadFile)(file);
         postContent.img = "https://drive.google.com/uc?export=view&id=" + resp;
@@ -78,9 +73,9 @@ postRoutes.post("/update/:id", upload.single("file"), (req, res) => __awaiter(vo
             success: false,
             msg: "O item não encontrado",
         });
-    const { title, body, edit_by, postType } = req.body;
-    console.log({ title, body, edit_by, postType });
-    const post = { title, body, edit_by, postType };
+    const { title, body, edit_by, postType, resumo } = req.body;
+    // console.log({ title, body, edit_by, postType });
+    const post = { title, body, edit_by, postType, resumo };
     const file = req.file;
     if (file) {
         const resp = yield (0, fileManager_1.uploadFile)(file);
@@ -193,6 +188,25 @@ postRoutes.get("/lists/:postType/", (req, res) => __awaiter(void 0, void 0, void
         return res.status(501).json({
             success: false,
             msg: "Houve um erro interno de servidor",
+            error: error,
+        });
+    }
+}));
+postRoutes.post("/search", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = req.body.query;
+    const searchParams = yield (0, util_1.tagBuilder)(query, "", "");
+    try {
+        const result = yield post_1.default.find({ tags: { $in: searchParams } });
+        return res.status(200).json({
+            success: true,
+            msg: "",
+            posts: result,
+        });
+    }
+    catch (error) {
+        return res.status(501).json({
+            success: false,
+            msg: "",
             error: error,
         });
     }

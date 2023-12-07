@@ -22,18 +22,43 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const util_1 = require("./../util/util");
 const mongoose_1 = __importStar(require("mongoose"));
+const user_1 = __importDefault(require("./user"));
 const Post = new mongoose_1.Schema({
     title: { type: String },
+    resumo: { type: String },
     body: { type: String },
     img: { type: String },
     noticeNumber: { type: String, default: "Nenhum" },
     postType: { type: Number, default: 1 },
     author: { type: mongoose_1.Types.ObjectId, ref: "User" },
     edit_by: { type: mongoose_1.Types.ObjectId, ref: "User" },
+    tags: { type: [String] },
 }, {
     timestamps: true,
+});
+Post.pre("save", function as(next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = (yield user_1.default.findById(this.author));
+        const userName = user.name || "";
+        const tags = (yield (0, util_1.tagBuilder)(this.title, userName, ""));
+        this.tags = tags;
+        next();
+    });
 });
 const PostSchema = mongoose_1.default.model("Post", Post);
 exports.default = PostSchema;

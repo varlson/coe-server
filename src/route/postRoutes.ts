@@ -3,6 +3,7 @@ import {
   Request as Req,
   Response as Res,
   NextFunction as Next,
+  query,
 } from "express";
 const route = Router();
 import multer from "multer";
@@ -10,7 +11,7 @@ import { deleteFile, uploadFile } from "../middleware/fileManager";
 import PostSchema from "../models/post";
 import { IPost, PostTypes } from "../types/types";
 import UserModel from "../models/user";
-import { documentToIpost, getAuthorNames } from "../util/util";
+import { documentToIpost, getAuthorNames, tagBuilder } from "../util/util";
 import { storage } from "../config/multer";
 const upload = multer({ storage: storage });
 const postRoutes = Router();
@@ -21,21 +22,13 @@ postRoutes.post(
   "/create",
   upload.single("file"),
   async (req: Req, res: Res) => {
-    const { title, body, author, postType, noticeNumber } = req.body;
+    const { title, body, author, postType, noticeNumber, resumo } = req.body;
     const file = req.file;
-    const postContent = { title, body, author, postType } as IPost;
+    const postContent = { title, body, author, postType, resumo } as IPost;
 
     if (postType == PostTypes.NOTICE) {
       postContent.noticeNumber = noticeNumber;
     }
-
-    console.log("postContent");
-    console.log(postContent);
-
-    // return res.status(200).json({
-    //   msg: "",
-    //   postContent,
-    // });
 
     if (file) {
       const resp = await uploadFile(file);
@@ -89,9 +82,9 @@ postRoutes.post(
         msg: "O item não encontrado",
       });
 
-    const { title, body, edit_by, postType } = req.body;
-    console.log({ title, body, edit_by, postType });
-    const post = { title, body, edit_by, postType } as IPost;
+    const { title, body, edit_by, postType, resumo } = req.body;
+    // console.log({ title, body, edit_by, postType });
+    const post = { title, body, edit_by, postType, resumo } as IPost;
 
     const file = req.file;
 
@@ -220,6 +213,26 @@ postRoutes.get("/lists/:postType/", async (req: Req, res: Res) => {
     return res.status(501).json({
       success: false,
       msg: "Houve um erro interno de servidor",
+      error: error,
+    });
+  }
+});
+
+postRoutes.post("/search", async (req: Req, res: Res) => {
+  const query = req.body.query;
+  const searchParams = await tagBuilder(query, "", "");
+
+  try {
+    const result = await PostSchema.find({ tags: { $in: searchParams } });
+    return res.status(200).json({
+      success: true,
+      msg: "",
+      posts: result,
+    });
+  } catch (error) {
+    return res.status(501).json({
+      success: false,
+      msg: "",
       error: error,
     });
   }
