@@ -11,7 +11,12 @@ import { deleteFile, uploadFile } from "../middleware/fileManager";
 import PostSchema from "../models/post";
 import { IPost, PostTypes } from "../types/types";
 import UserModel from "../models/user";
-import { documentToIpost, getAuthorNames, tagBuilder } from "../util/util";
+import {
+  authorNameSetter,
+  documentToIpost,
+  getAuthorNames,
+  tagBuilder,
+} from "../util/util";
 import { storage } from "../config/multer";
 const upload = multer({ storage: storage });
 const postRoutes = Router();
@@ -223,11 +228,12 @@ postRoutes.post("/search", async (req: Req, res: Res) => {
   const searchParams = await tagBuilder(query, "", "");
 
   try {
-    const result = await PostSchema.find({ tags: { $in: searchParams } });
+    const results = await PostSchema.find({ tags: { $in: searchParams } });
+
     return res.status(200).json({
       success: true,
       msg: "",
-      posts: result,
+      posts: results,
     });
   } catch (error) {
     return res.status(501).json({

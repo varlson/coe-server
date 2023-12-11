@@ -1,7 +1,8 @@
+import { userType } from "@/types/types";
 // import { IPost } from "./../types/types";
 import jwt from "jsonwebtoken";
 import { Document, Types } from "mongoose";
-import { IPost, PostTypes, postParamType } from "../types/types";
+import { IPost, PostTypes, postParamType, userType } from "../types/types";
 import UserModel from "../models/user";
 
 export const credentialsVerifier = (username: string, password: string) => {
@@ -105,4 +106,19 @@ export const extractor = async (value: string) => {
     );
     resolve(unique);
   });
+};
+
+export const authorNameSetter = async (item: IPost) => {
+  try {
+    const user = (await UserModel.findOne({
+      _id: item.author.toString(),
+    })) as userType;
+
+    const newItem = { ...item, ["author"]: user.name || "Desc" };
+    console.log("user");
+    console.log(newItem);
+    return newItem;
+  } catch (error: any) {
+    console.log(error.message);
+  }
 };

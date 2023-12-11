@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractor = exports.tagBuilder = exports.getAuthorNames = exports.documentToIpost = exports.accessTokenGenerator = exports.credentialsVerifier = void 0;
+exports.authorNameSetter = exports.extractor = exports.tagBuilder = exports.getAuthorNames = exports.documentToIpost = exports.accessTokenGenerator = exports.credentialsVerifier = void 0;
 // import { IPost } from "./../types/types";
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const types_1 = require("../types/types");
@@ -83,3 +83,18 @@ const extractor = (value) => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 exports.extractor = extractor;
+const authorNameSetter = (item) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = (yield user_1.default.findOne({
+            _id: item.author.toString(),
+        }));
+        const newItem = Object.assign(Object.assign({}, item), { ["author"]: user.name || "Desc" });
+        console.log("user");
+        console.log(newItem);
+        return newItem;
+    }
+    catch (error) {
+        console.log(error.message);
+    }
+});
+exports.authorNameSetter = authorNameSetter;

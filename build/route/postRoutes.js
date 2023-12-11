@@ -196,11 +196,11 @@ postRoutes.post("/search", (req, res) => __awaiter(void 0, void 0, void 0, funct
     const query = req.body.query;
     const searchParams = yield (0, util_1.tagBuilder)(query, "", "");
     try {
-        const result = yield post_1.default.find({ tags: { $in: searchParams } });
+        const results = yield post_1.default.find({ tags: { $in: searchParams } });
         return res.status(200).json({
             success: true,
             msg: "",
-            posts: result,
+            posts: results,
         });
     }
     catch (error) {
